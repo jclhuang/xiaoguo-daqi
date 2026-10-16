@@ -1,41 +1,6 @@
 {
- "updated": "2026-10-15T21:27:19Z",
- "playlists": {
-  "singapore": [
-   "KlcDWOJXG9U",
-   "w9tVSbyx42U",
-   "k0rXafcUb-w",
-   "ibryUQ6p5Gk",
-   "ZerIZrUzNDY",
-   "brhW_6f_1-k",
-   "EOLOdJw-iuk",
-   "zkEWYAgs7lM",
-   "N8ZtRVG2u1I",
-   "a9unQnXHJlE",
-   "brXsc_Xkvr4",
-   "sCkioH-ZQZE",
-   "Ax4Q8DuytaY",
-   "YI6eqCrDEt0",
-   "Hb2iWa8onIk"
-  ],
-  "shorts": [
-   "phfICCp8YBg",
-   "swtKz3n-u0M",
-   "6xzt48HacB0",
-   "RthPEcfuYbo",
-   "ZoZ0ap-EtM0",
-   "m6Th_zn60Pw",
-   "TeGQG5r6kM8",
-   "0j8sKEPFUxk",
-   "mWznGnavorg",
-   "sCkioH-ZQZE",
-   "Ax4Q8DuytaY",
-   "YI6eqCrDEt0",
-   "Hb2iWa8onIk",
-   "teEsJaU1o_M",
-   "XtHj_I5_ZCQ"
-  ]
- },
+ "updated": "2026-10-16T04:37:42Z",
+ "playlists": {},
  "videos": [
   {
    "id": "tnM8WkhJiZM",
@@ -58,7 +23,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "u_j-lm-OvG4",
@@ -81,7 +47,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "YI6eqCrDEt0",
@@ -92,7 +59,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "Ax4Q8DuytaY",
@@ -103,7 +71,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "VNC-8Y5zEgk",
@@ -126,7 +95,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "sCkioH-ZQZE",
@@ -137,7 +107,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "EOLOdJw-iuk",
@@ -160,7 +131,8 @@
    "topics": [
     "其他"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "EBDms5HeNnk",
@@ -183,7 +155,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "TeGQG5r6kM8",
@@ -194,7 +167,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "6xzt48HacB0",
@@ -206,7 +180,8 @@
     "新加坡",
     "地緣政治"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "m6Th_zn60Pw",
@@ -217,7 +192,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "ZoZ0ap-EtM0",
@@ -228,7 +204,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "phfICCp8YBg",
@@ -239,7 +216,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "RthPEcfuYbo",
@@ -250,7 +228,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "swtKz3n-u0M",
@@ -261,7 +240,8 @@
    "topics": [
     "新加坡"
    ],
-   "short": true
+   "short": true,
+   "short_checked": true
   },
   {
    "id": "brhW_6f_1-k",
