@@ -13,5 +13,19 @@
   "sample": false,
   "md": "content/articles/新加坡城市治理優缺點與台灣務實借鑑專題報告REV.md",
   "docx": "content/files/新加坡城市治理優缺點與台灣務實借鑑專題報告REV.docx"
+ },
+ {
+  "id": "file-測試新加坡PDF",
+  "kind": "pdf",
+  "title": "測試新加坡PDF",
+  "date": "2026-10-22",
+  "summary": "測試 PDF 冥想與大腦的測試 PDF，將被刪除。",
+  "tags": [
+   "PDF",
+   "新加坡"
+  ],
+  "sample": false,
+  "pdf": "content/files/測試新加坡PDF.pdf",
+  "thumb": "content/files/thumbs/測試新加坡PDF.png"
  }
 ]
