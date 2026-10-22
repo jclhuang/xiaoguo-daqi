@@ -36,8 +36,11 @@ def fetch_feed():
     out = []
     for e in ET.fromstring(get(f"https://www.youtube.com/feeds/videos.xml?channel_id={SITE['channelId']}", 12, 2)).findall("a:entry", NS):
         link = e.find("a:link", NS).get("href", ""); g = e.find("m:group", NS); th = g.find("m:thumbnail", NS) if g is not None else None
-        out.append(item(e.find("yt:videoId", NS).text, e.find("a:title", NS).text or "", "/shorts/" in link,
-                        e.find("a:published", NS).text, th.get("url") if th is not None else None))
+        it = item(e.find("yt:videoId", NS).text, e.find("a:title", NS).text or "", "/shorts/" in link,
+                  e.find("a:published", NS).text, th.get("url") if th is not None else None)
+        st = g.find("m:community/m:statistics", NS) if g is not None else None
+        it["views"] = int(st.get("views") or 0) if st is not None else 0
+        out.append(it)
     return out
 
 def fallback_list(n=15):
@@ -47,6 +50,28 @@ def fallback_list(n=15):
             vid, title = l.split("\t", 1); out.append(item(vid, title, tab == "shorts"))
     if not out: raise RuntimeError("yt-dlp 也拿不到清單")
     return out
+
+_LIVE = {}
+def channel_live_map(url, n=40):
+    """yt-dlp 頻道清單（不需開影片頁）：{影片ID: live_status}。用來在影片頁被 YouTube 擋時判斷是否為首播前。"""
+    global _LIVE
+    if url not in _LIVE:
+        _LIVE[url] = {}
+        for tab in ("videos", "shorts", "streams"):
+            try:
+                r = subprocess.run(["yt-dlp", "--flat-playlist", "-I", f"1:{n}", "--print", "%(id)s\t%(live_status)s", f"{url}/{tab}"], capture_output=True, text=True, timeout=180)
+                for l in r.stdout.splitlines():
+                    i, st = l.split("\t", 1); _LIVE[url][i] = st
+            except Exception as e: print("yt-dlp live map failed", e)
+    return _LIVE[url]
+
+def decide(f, url):
+    """回傳 (是否收錄, 公開日期)。影片頁可判斷就用影片頁；被擋（無法判斷）時改看頻道清單的 live_status。"""
+    ok, d = public_status(f["id"])
+    if ok is not None: return ok, d
+    st = channel_live_map(url).get(f["id"])
+    if st is None: return (f.get("views", 0) > 20), None   # 清單裡也沒有：只在 RSS 觀看數明顯大於 0 時收錄
+    return st not in ("is_upcoming", "is_live"), None
 
 def public_status(vid):
     """(已公開?, 公開日期)。看不出來 → (None, None)，這次先跳過。"""
@@ -113,7 +138,7 @@ def main():
             if not v.get("published") and f.get("published"): v["published"] = utc(f["published"]); changed = True
             continue
         if f["published"] and datetime.fromisoformat(f["published"]) > now: print("skip future", f["id"]); continue
-        ok, d = public_status(f["id"])
+        ok, d = decide(f, SITE["channelUrl"]); f.pop("views", None)
         if not ok: print("skip（尚未公開/首播前/無法判斷）", f["id"], f["title"][:30]); continue
         if d and (len(d) > 10 or not f["published"]): f["published"] = d
         if not f["published"]: continue
