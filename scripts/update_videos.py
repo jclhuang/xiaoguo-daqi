@@ -142,7 +142,7 @@ def main():
         ok, d = decide(f, SITE["channelUrl"]); f.pop("views", None)
         if not ok: print("skip（尚未公開/首播前/無法判斷）", f["id"], f["title"][:30]); continue
         if d and (len(d) > 10 or not f["published"]): f["published"] = d
-        if not f["published"]: continue
+        if not f["published"]: f["published"] = now.isoformat(); f["dateApprox"] = True  # 抓不到日期：用發現時間
         f["published"] = utc(f["published"]); f["topics"] = topics_for(f["title"])
         vids.append(f); byid[f["id"]] = f; changed = True; print("NEW", f["id"], f["title"][:40], f["topics"])
     if changed:
