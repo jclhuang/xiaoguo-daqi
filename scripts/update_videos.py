@@ -79,7 +79,8 @@ def public_status(vid):
     except Exception: return None, None
     st = re.search(r'"playabilityStatus":\{"status":"([A-Z_]+)"', h)
     if not st: return None, None
-    if '"isUpcoming":true' in h or '"isUnlisted":true' in h or st.group(1) != "OK": return False, None
+    if '"isUpcoming":true' in h or st.group(1) == "LIVE_STREAM_OFFLINE" or '"isUnlisted":true' in h: return False, None
+    if st.group(1) != "OK": return None, None   # 例如 LOGIN_REQUIRED（雲端主機被 YouTube 要求登入）→ 無法判斷，改看頻道清單
     d = re.search(r'"(?:publishDate|uploadDate)":"([^"]+)"', h)
     return True, d.group(1) if d else None
 
