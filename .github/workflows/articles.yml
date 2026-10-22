@@ -1,0 +1,37 @@
+name: 文章與簡報
+on:
+  push:
+    branches: [main]
+    paths: ["content/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: xgdq-bot, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: 安裝 pandoc / poppler（PDF 縮圖）
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq pandoc poppler-utils fonts-noto-cjk >/dev/null
+      - name: 需要時才安裝 LibreOffice（轉 PPTX）
+        run: |
+          need=0
+          for f in content/inbox/*.ppt content/inbox/*.pptx content/inbox/*.odp content/files/*.ppt content/files/*.pptx content/files/*.odp; do
+            [ -e "$f" ] || continue
+            [ -e "content/files/$(basename "${f%.*}").pdf" ] || need=1
+          done
+          if [ $need = 1 ]; then sudo apt-get install -y -qq --no-install-recommends libreoffice-impress libreoffice-writer >/dev/null; fi
+      - name: 處理 inbox、轉檔、建立 data/articles.json
+        run: python scripts/build_articles.py
+      - name: 有變更才 commit
+        run: |
+          git config user.name "inner-cosmos-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A content data sw.js
+          if git diff --cached --quiet; then echo "沒有變更"; exit 0; fi
+          git commit -m "自動整理文章 $(date -u +%F)"
+          git pull --rebase && git push

@@ -1,62 +1,62 @@
 const CFG=window.APP_CONFIG;document.title=CFG.name;appname.textContent=CFG.name;tagline.textContent=CFG.tagline;
-let V=[],PL={},POSTS=[],UPD='';const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const TOPICS=['全部','兩岸關係','中美關係','台灣','新加坡','地緣政治','其他'];
-const thumb=id=>`https://i.ytimg.com/vi/${id}/hqdefault.jpg`, yt=id=>`https://youtu.be/${id}`;
-const subUrl=CFG.channel+'?sub_confirmation=1';
-const fmtD=s=>{const d=new Date(s);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
-const clean=t=>String(t).replace(/\s#\S+/g,'').replace(/^\|/,'').trim();
-function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
-const longs=()=>V.filter(v=>!v.short), shorts=()=>V.filter(v=>v.short);
-const CN={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
-function epOf(t){let m=t.match(/EP\s*0?(\d+)/i)||t.match(/第([一二三四五六七八九十\d]+)集/);if(!m)return null;let n=isNaN(m[1])?CN[m[1]]:+m[1];
- const p=(t.match(/（([上中下])）/)||[])[1];return {n,p,k:n*10+({上:1,中:2,下:3}[p]||0)}}
-function seriesEps(s){return longs().filter(v=>v.title.includes(s.match)).map(v=>({...v,ep:epOf(v.title)})).sort((a,b)=>(a.ep?.k??999)-(b.ep?.k??999)||a.published.localeCompare(b.published))}
-const vcard=v=>`<div class="v" data-id="${v.id}"><img loading="lazy" src="${thumb(v.id)}" alt=""><div class="t">${esc(clean(v.title))}</div><div class="m">${fmtD(v.published)}${v.topics?' ・ '+v.topics.filter(x=>x!=='其他').join('・'):''}</div></div>`;
-function home(){const L=longs(),latest=L[0],feat=V.filter(v=>v.featured&&v.id!==latest?.id);
- view.innerHTML=(latest?`<h2>最新一集</h2><div class="hero v" data-id="${latest.id}"><img src="https://i.ytimg.com/vi/${latest.id}/maxresdefault.jpg" onerror="this.src='${thumb(latest.id)}'" alt=""><div class="play">▶</div><div class="cap"><span class="badge">NEW</span><span class="m">${fmtD(latest.published)}</span><div class="t">${esc(clean(latest.title))}</div></div></div>`:'')
- +`<div class="card sub"><img src="icons/icon-192.png" alt=""><div style="flex:1"><b>每週一集深度解析</b><div class="m" style="font-size:13px;color:var(--mute)">訂閱頻道，新片上線第一時間收到通知</div></div><a class="btn" href="${subUrl}" target="_blank" rel="noopener">訂閱</a></div>`
- +(feat.length?`<h2>精選推薦</h2><div class="row">${feat.map(vcard).join('')}</div>`:'')
- +CFG.series.map(s=>{const e=seriesEps(s);return `<h2>專題｜${esc(s.name)}</h2><div class="row">${e.map(vcard).join('')}</div>`}).join('')
- +`<h2>近期影片</h2><div class="row">${L.slice(1,9).map(vcard).join('')}</div>`
- +(shorts().length?`<h2>短影音</h2><div class="row">${shorts().slice(0,10).map(vcard).join('')}</div>`:'')
- +(POSTS[0]?`<h2>最新簡報／文章</h2>${postCard(POSTS[0])}`:'')+`<div class="upd">影片資料更新：${UPD?new Date(UPD).toLocaleString('zh-TW'):'—'}</div>`}
-let curT='全部',q='',showShorts=false;
-function videos(){view.innerHTML=`<input type="search" id="q" placeholder="搜尋影片標題…" value="${esc(q)}"><div class="chips" id="tp">${TOPICS.map(t=>`<button class="chip ${t===curT?'on':''}" data-t="${t}">${t}</button>`).join('')}<button class="chip ${showShorts?'on':''}" id="sh">含短影音</button></div><div class="grid" id="vg"></div>`;
- const draw=()=>{const qq=q.trim().toLowerCase();const r=V.filter(v=>(showShorts||!v.short)&&(curT==='全部'||v.topics?.includes(curT))&&(!qq||v.title.toLowerCase().includes(qq)||(v.desc||'').toLowerCase().includes(qq)));
-  $('#vg').innerHTML=r.length?r.map(vcard).join(''):'<div class="empty" style="grid-column:1/-1">找不到符合的影片</div>'};
- $('#q').oninput=e=>{q=e.target.value;draw()};$('#tp').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='sh')showShorts=!showShorts;else curT=b.dataset.t;videos()};draw()}
-function series(){view.innerHTML=CFG.series.map(s=>{const e=seriesEps(s);return `<div class="card series"><div class="sn">${esc(s.name)}</div><p>${esc(s.desc)}</p><p style="color:var(--mute);font-size:12px">共 ${e.length} 集・依集數排序</p>
- ${e.map(v=>`<div class="ep" data-id="${v.id}"><div class="no">${v.ep?`EP<b>${v.ep.n}</b>${v.ep.p?'（'+v.ep.p+'）':''}`:'特輯'}</div><img loading="lazy" src="${thumb(v.id)}" alt=""><div class="t">${esc(clean(v.title).replace(/[｜|]?\s*新加坡故事\s*(EP\s*\d+)?\s*(（[上中下]）)?[｜|─]?/i,' ').trim())}</div></div>`).join('')}
- ${s.playlist?`<a class="btn ghost" href="https://www.youtube.com/playlist?list=${s.playlist}" target="_blank" rel="noopener">在 YouTube 依序播放</a>`:''}</div>`}).join('')
- +`<div class="card"><b>更多專題</b><p style="font-size:14px;color:var(--mute);margin:4px 0 0">台美安全、兩岸交流等系列整理中，敬請期待。</p></div>`}
-const postCard=p=>`<div class="card post" data-p="${esc(p.file||p.url)}"><div class="k">${p.type==='slides'?'📊 簡報':'📝 文章'}・${esc(p.date)}</div><div class="pt">${esc(p.title)}</div>${p.summary?`<div class="ps">${esc(p.summary)}</div>`:''}</div>`;
-function posts(){view.innerHTML=`<h2>簡報／文章</h2>`+(POSTS.length?POSTS.map(postCard).join(''):'<div class="empty">尚無文章</div>')}
-function about(){view.innerHTML=`<div class="card" style="text-align:center"><img src="icons/icon-192.png" style="width:96px;border-radius:20px" alt=""><h2 style="justify-content:center">${esc(CFG.name)}</h2><p style="font-size:15px">${esc(CFG.about)}</p>
- <a class="btn" href="${subUrl}" target="_blank" rel="noopener">▶ 訂閱 YouTube 頻道</a></div><div class="card"><b>連結</b><br>${CFG.links.map(l=>`<a class="btn ghost" href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}<button class="btn ghost" id="share">分享這個 App</button></div>
- <div class="card" style="font-size:14px"><b>加到手機主畫面</b><br>iPhone：Safari 下方「分享」→「加入主畫面」。<br>Android：Chrome 右上「⋮」→「安裝應用程式」或「加到主畫面」。</div><div class="upd">影片 ${longs().length} 支・短影音 ${shorts().length} 支・資料更新 ${UPD?new Date(UPD).toLocaleString('zh-TW'):'—'}</div>`;
- $('#share').onclick=async()=>{const d={title:CFG.name,url:location.href.split('#')[0]};if(navigator.share)navigator.share(d).catch(()=>{});else{await navigator.clipboard?.writeText(d.url);toast('已複製連結')}}}
-function openSheet(h){sheetbody.innerHTML=h;sheet.hidden=false;document.body.style.overflow='hidden'}
-function closeSheet(){sheet.hidden=true;sheetbody.innerHTML='';document.body.style.overflow=''}
-function playVideo(id){const v=V.find(x=>x.id===id)||{id,title:''};
- openSheet(`<div class="embed ${v.short?'vert':''}"><iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
- <h3 style="font-family:'Noto Serif TC',serif;line-height:1.5;margin:12px 0 4px">${esc(clean(v.title))}</h3><div class="m" style="color:var(--mute);font-size:13px">${v.published?fmtD(v.published):''}</div>
- <a class="btn" href="${subUrl}" target="_blank" rel="noopener">訂閱頻道</a><a class="btn ghost" href="${yt(id)}" target="_blank" rel="noopener">在 YouTube 觀看</a><button class="btn ghost" data-share="${id}">分享</button>
- ${v.desc?`<p style="font-size:14px;color:#c9c2b0;white-space:pre-line">${esc(v.desc)}</p>`:''}`)}
-function md(s){s=s.replace(/^---\n[\s\S]*?\n---\n/,'');const L=s.split('\n');let o='',inL='';const il=t=>esc(t).replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img alt="$1" src="$2">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/`(.+?)`/g,'<code>$1</code>');
- const close=()=>{if(inL){o+=`</${inL}>`;inL=''}};
- for(const l of L){let m;if(m=l.match(/^(#{1,3})\s+(.*)/)){close();o+=`<h${m[1].length}>${il(m[2])}</h${m[1].length}>`}else if(m=l.match(/^\s*[-*]\s+(.*)/)){if(inL!=='ul'){close();o+='<ul>';inL='ul'}o+=`<li>${il(m[1])}</li>`}
-  else if(m=l.match(/^\s*\d+\.\s+(.*)/)){if(inL!=='ol'){close();o+='<ol>';inL='ol'}o+=`<li>${il(m[1])}</li>`}else if(m=l.match(/^>\s?(.*)/)){close();o+=`<blockquote>${il(m[1])}</blockquote>`}
-  else if(!l.trim())close();else{close();o+=`<p>${il(l)}</p>`}}close();return o}
-async function openPost(f){const p=POSTS.find(x=>(x.file||x.url)===f);if(!p)return;const vid=p.video?`<div class="v card" data-id="${p.video}" style="display:flex;gap:10px;align-items:center"><img src="${thumb(p.video)}" style="width:40%" alt=""><div><div class="k" style="font-size:12px;color:var(--gold)">相關影片</div>${esc(clean((V.find(v=>v.id===p.video)||{}).title||'觀看影片'))}</div></div>`:'';
- if(p.type==='slides'){const u=p.file||p.url;openSheet(`<div style="margin-top:44px"><div class="k" style="color:var(--gold);font-size:12px">📊 簡報・${esc(p.date)}</div><h2>${esc(p.title)}</h2><a class="btn" href="${esc(u)}" target="_blank" rel="noopener">開啟／下載簡報</a><iframe class="pdf" src="${esc(u)}" style="margin-top:12px"></iframe>${vid}</div>`);return}
- let body='';try{body=md(await (await fetch(p.file)).text())}catch(e){body='<p>離線中，無法載入文章。</p>'}
- openSheet(`<div class="md" style="margin-top:44px"><div style="color:var(--gold);font-size:12px">📝 文章・${esc(p.date)}</div>${body}</div>${vid}<a class="btn" href="${subUrl}" target="_blank" rel="noopener">訂閱頻道</a>`)}
-const R={home,videos,series,posts,about};
-function go(v){if(!R[v])v='home';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));R[v]();scrollTo(0,0);if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}
-document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-document.addEventListener('click',async e=>{const s=e.target.closest('[data-share]');if(s){const d={title:CFG.name,url:yt(s.dataset.share)};if(navigator.share)navigator.share(d).catch(()=>{});else{await navigator.clipboard?.writeText(d.url);toast('已複製影片連結')}return}
- const v=e.target.closest('[data-id]');if(v){playVideo(v.dataset.id);return}const p=e.target.closest('[data-p]');if(p)openPost(p.dataset.p)});
-sheet.onclick=e=>{if(e.target===sheet||e.target.classList.contains('close'))closeSheet()};
-(async()=>{try{const[a,b]=await Promise.all([fetch('data/videos.json').then(r=>r.json()),fetch('data/posts.json').then(r=>r.json())]);V=a.videos;PL=a.playlists||{};UPD=a.updated;POSTS=b.posts||[]}catch(e){toast('資料載入失敗')}go(location.hash.slice(1))})();
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let VIDS=[],SERIES=[],ARTS=[],PODS=[],HIDE=new Set();
+const J=u=>fetch(u).then(r=>r.ok?r.json():null).catch(()=>null);
+const clean=t=>String(t).replace(/#\S+/g,'').trim();
+const vcard=v=>`<a class="vcard" href="${v.url}" target="_blank" rel="noopener"><img loading="lazy" src="${v.thumbnail}" alt=""><span>${esc(clean(v.title))}</span><small>${(v.published||'').slice(0,10)}${v.type==='short'?'・Shorts':''}</small></a>`;
+const kindLabel={md:'文章',pdf:'PDF',slides:'簡報',link:'連結',file:'檔案'};
+const acard=a=>`<div class="card acard" data-art="${esc(a.id)}">${a.thumb?`<img src="${a.thumb}" alt="" loading="lazy">`:''}<div><div class="ameta"><b class="badge">${kindLabel[a.kind]||'文章'}</b> ${esc(a.date)}</div><div class="atitle">${esc(a.title)}</div><div class="asum">${esc(a.summary)}</div><div class="chips">${(a.tags||[]).map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}</div></div></div>`;
+const pcard=p=>`<div class="card acard" data-pod="${esc(p.id)}"><div><div class="ameta"><b class="badge">Podcast</b> ${esc(p.date)}${p.audio?'・音檔':p.embed?'・外部平台':''}</div><div class="atitle">${esc(p.title)}</div><div class="asum">${esc(p.summary)}</div></div></div>`;
+function seriesList(){/* 播放清單優先；沒有時用標題規則「｜系列名 EPxx」 */
+ const byId=Object.fromEntries(VIDS.map(v=>[v.id,v]));let S=SERIES.map(s=>({name:s.title,url:s.url,vids:s.videos.map(i=>byId[i]).filter(Boolean)})).filter(s=>s.vids.length);
+ if(!S.length){const m={};VIDS.forEach(v=>{const r=v.title.match(/｜\s*([^｜]+?)\s*(?:EP\s*\d+|（[上中下]）)/);if(r)(m[r[1]]=m[r[1]]||[]).push(v)});S=Object.entries(m).map(([name,vids])=>({name,vids}))}
+ const longN=x=>x.vids.filter(v=>v.type!=='short').length;return S.sort((a,b)=>longN(b)-longN(a)||b.vids.length-a.vids.length)}
+function feat(){return (CFG.featured||[]).map(f=>{const s=seriesList().find(x=>x.name.includes(f.match));const vids=s?s.vids:VIDS.filter(v=>v.title.includes(f.match));return{...f,vids,url:s&&s.url}}).filter(f=>f.vids.length)}
+function footer(){return `<footer>${CFG.about?`<p>${esc(CFG.about)}</p>`:''}<p><a href="${CFG.channel}" target="_blank" rel="noopener">YouTube 頻道</a>${CFG.sister?`　｜　姊妹站：<a href="${CFG.sister.url}" target="_blank" rel="noopener">${esc(CFG.sister.name)}</a>（${esc(CFG.sister.desc)}）`:''}</p></footer>`}
+function renderHome(){const latest=[...ARTS.map(a=>({...a,_k:'a'})),...PODS.map(p=>({...p,_k:'p'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+view.innerHTML=`<div class="card hero"><p>${esc(CFG.about)}</p></div>
+<h2>最新影片</h2><div class="vrow">${VIDS.slice(0,6).map(vcard).join('')}</div>
+<h2>精選系列</h2>${feat().map((f,i)=>`<div class="card series" data-series="${esc(f.name)}"><div class="st">♟ ${esc(f.name)}</div><small>${f.vids.length} 支影片</small><p class="asum">${esc(f.desc||'')}</p><div class="vrow">${f.vids.slice(0,4).map(vcard).join('')}</div></div>`).join('')}
+<h2>最新文章與 Podcast</h2>${latest.length?latest.map(x=>x._k==='a'?acard(x):pcard(x)).join(''):'<p class="empty">還沒有內容。</p>'}${footer()}`}
+let VF='series';
+function renderVideos(f,focus){VF=f||VF;const S=seriesList();const inS=new Set(S.flatMap(s=>s.vids.map(v=>v.id)));
+const tabs=[['series','依系列'],['all','全部'],['video','長片'],['short','Shorts']];
+let body='';if(VF==='series'){body=S.map(s=>`<div class="card" id="s-${esc(s.name)}"><h3>♟ ${esc(s.name)}（${s.vids.length}）</h3><div class="vrow">${s.vids.map(vcard).join('')}</div>${s.url?`<a class="tag" href="${s.url}" target="_blank" rel="noopener">在 YouTube 開啟播放清單 ›</a>`:''}</div>`).join('');
+ const other=VIDS.filter(v=>!inS.has(v.id));if(other.length)body+=`<div class="card"><h3>其他影片（${other.length}）</h3><div class="vrow">${other.map(vcard).join('')}</div></div>`}
+else body=`<div class="vgrid">${VIDS.filter(v=>VF==='all'||v.type===VF).map(vcard).join('')}</div>`;
+view.innerHTML=`<h2>全部影片（${VIDS.length}）</h2><div class="chips">${tabs.map(([k,n])=>`<button class="chip ${k===VF?'sel':''}" data-vf="${k}">${n}</button>`).join('')}</div>${body}${footer()}`;
+document.querySelectorAll('[data-vf]').forEach(b=>b.onclick=()=>renderVideos(b.dataset.vf));
+if(focus){const el=document.getElementById('s-'+focus);if(el)el.scrollIntoView({block:'start'})}}
+function renderArticles(t){const tags=[...new Set(ARTS.flatMap(a=>a.tags||[]))];const L=ARTS.filter(a=>!t||(a.tags||[]).includes(t));
+view.innerHTML=`<h2>文章與簡報</h2>${tags.length>1?`<div class="chips"><button class="chip ${!t?'sel':''}" data-at="">全部</button>${tags.map(x=>`<button class="chip ${x===t?'sel':''}" data-at="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:''}${L.length?L.map(acard).join(''):'<p class="empty">還沒有文章。</p>'}${footer()}`;
+document.querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>renderArticles(b.dataset.at))}
+async function mdInto(el,path){try{let t=await fetch(path).then(r=>{if(!r.ok)throw 0;return r.text()});t=t.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/,'');el.innerHTML=marked.parse(t);const base=path.replace(/[^/]+$/,'');
+el.querySelectorAll('img').forEach(i=>{const s=i.getAttribute('src');if(s&&!/^(https?:|data:|\/)/.test(s))i.src=base+s});el.querySelectorAll('a[href^="http"]').forEach(x=>{x.target='_blank';x.rel='noopener'});el.querySelectorAll('script,iframe,object').forEach(x=>x.remove())}catch(e){el.textContent='載入失敗（離線時需先開啟過一次）。'}}
+function renderArticle(id){const a=ARTS.find(x=>x.id===id);if(!a)return renderArticles();const v=a.video&&VIDS.find(x=>x.id===a.video);
+view.innerHTML=`<button class="chip back" data-v="articles">‹ 文章列表</button><article class="card art"><div class="ameta"><b class="badge">${kindLabel[a.kind]||'文章'}</b> ${esc(a.date)}</div><h2>${esc(a.title)}</h2><div class="chips">${(a.tags||[]).map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}</div>
+<div id="artbody">${a.md?'載入中…':`<p>${esc(a.summary)}</p>`}</div>${a.embed?`<div class="embed"><iframe src="${a.embed}" allowfullscreen loading="lazy"></iframe></div>`:''}
+${a.pdf&&!a.md&&a.thumb?`<a href="${a.pdf}" target="_blank" rel="noopener"><img style="width:100%;border-radius:8px" src="${a.thumb}" alt="PDF 第一頁"></a>`:''}
+<div>${a.pdf?`<a class="btn" href="${a.pdf}" target="_blank" rel="noopener">開啟 PDF</a><a class="btn ghost" href="${a.pdf}" download>下載 PDF</a>`:''}${a.pptx?`<a class="btn ghost" href="${a.pptx}" download>下載 PPTX</a>`:''}${a.docx?`<a class="btn ghost" href="${a.docx}" download>下載 Word</a>`:''}${a.link?`<a class="btn ghost" href="${esc(a.link)}" target="_blank" rel="noopener">開啟原始連結</a>`:''}</div></article>
+${v?`<div class="card"><h3>相關影片</h3><div class="vrow">${vcard(v)}</div></div>`:''}${footer()}`;if(a.md)mdInto($('#artbody'),a.md)}
+const fmtT=s=>{s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':':'')+String(m).padStart(h?2:1,'0')+':'+String(x).padStart(2,'0')};
+function renderPodcast(){view.innerHTML=`<h2>Podcast</h2>${(CFG.podcastLinks||[]).length?`<div class="chips">${CFG.podcastLinks.map(l=>`<a class="chip" href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`:''}
+${PODS.length?PODS.map(pcard).join(''):'<p class="empty">還沒有節目。把音檔（mp3/m4a）或含 Spotify／Apple Podcasts 連結的 .txt 上傳到 content/inbox 就會出現在這裡。</p>'}${footer()}`}
+function renderEpisode(id){const p=PODS.find(x=>x.id===id);if(!p)return renderPodcast();
+view.innerHTML=`<button class="chip back" data-v="podcast">‹ 節目列表</button><article class="card art"><div class="ameta"><b class="badge">Podcast</b> ${esc(p.date)}</div><h2>${esc(p.title)}</h2>
+${p.audio?`<audio id="player" controls preload="metadata" src="${p.audio}"></audio>`:''}${p.embed?`<div class="embed ${/spotify|apple|soundcloud/.test(p.embed)?'audio':''}"><iframe src="${p.embed}" allow="autoplay; encrypted-media" loading="lazy"></iframe></div>`:''}
+${p.chapters&&p.chapters.length?`<h3>章節</h3>${p.chapters.map(c=>`<div class="chap" data-t="${c.t}"><b>${fmtT(c.t)}</b><span>${esc(c.title)}</span></div>`).join('')}`:''}
+<div id="artbody">${p.notes?'載入中…':`<p>${esc(p.summary)}</p>`}</div>
+<div>${p.audio?`<a class="btn ghost" href="${p.audio}" download>下載音檔</a>`:''}${p.link?`<a class="btn ghost" href="${esc(p.link)}" target="_blank" rel="noopener">在原平台收聽</a>`:''}</div></article>${footer()}`;
+document.querySelectorAll('.chap').forEach(c=>c.onclick=()=>{const a=$('#player');if(a){a.currentTime=+c.dataset.t;a.play()}});
+if(p.notes)mdInto($('#artbody'),p.notes).then(()=>{if(p.chapters&&p.chapters.length)$('#artbody').querySelectorAll('li,p').forEach(e=>{if(/^\s*(\d{1,2}:)?\d{1,2}:\d{2}\s/.test(e.textContent))e.remove()})})}
+function go(v,arg){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===({article:'articles',episode:'podcast'}[v]||v)));
+const R={home:renderHome,videos:renderVideos,articles:renderArticles,article:renderArticle,podcast:renderPodcast,episode:renderEpisode};(R[v]||renderHome)(arg);
+history.replaceState(0,'','#'+v+(arg?'/'+encodeURIComponent(arg):''));scrollTo(0,0)}
+function route(){const h=location.hash.slice(1).split('/');go(h[0]||'home',h[1]?decodeURIComponent(h[1]):undefined)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-v],[data-art],[data-pod],[data-series]');if(!t)return;
+if(t.dataset.art)go('article',t.dataset.art);else if(t.dataset.pod)go('episode',t.dataset.pod);else if(t.dataset.series&&!e.target.closest('a')){go('videos');renderVideos('series',t.dataset.series)}else if(t.dataset.v)go(t.dataset.v)});
+window.addEventListener('hashchange',route);
+Promise.all([J('data/videos.json'),J('data/series.json'),J('data/articles.json'),J('data/podcast.json'),J('data/podcast_feed.json'),J('data/overrides.json')]).then(([v,s,a,p,pf,ov])=>{
+ov=ov||{};HIDE=new Set(Object.keys(ov).filter(k=>ov[k]&&ov[k].hide));VIDS=((v&&v.videos)||[]).filter(x=>!HIDE.has(x.id)&&x.published).sort((a,b)=>b.published.localeCompare(a.published));
+SERIES=s||[];ARTS=a||[];PODS=[...(p||[]),...(pf||[])].sort((x,y)=>(y.date||'').localeCompare(x.date||''));route()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');

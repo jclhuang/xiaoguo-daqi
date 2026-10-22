@@ -1,0 +1,37 @@
+name: 每日匯入小國大棋新影片
+on:
+  schedule:
+    - cron: "0 19 * * *"   # 每天 19:00 UTC = 台北 03:00
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: xgdq-bot, cancel-in-progress: false }
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: 安裝 yt-dlp（RSS 失敗時的備援）
+        run: pip install -q yt-dlp
+      - name: 讀 RSS／播放清單並合併（只收已公開影片）
+        run: python scripts/update_videos.py
+      - name: 有變更才 commit；50 天沒動靜就 keepalive
+        run: |
+          git config user.name "inner-cosmos-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A data sw.js
+            git commit -m "自動匯入新影片 $(date -u +%F)"
+            git pull --rebase && git push
+          else
+            last=$(git log -1 --format=%ct); now=$(date +%s)
+            if [ $(( (now-last)/86400 )) -ge 50 ]; then
+              git commit --allow-empty -m "keepalive：避免排程因 60 天無活動被停用"
+              git pull --rebase && git push
+            else
+              echo "沒有新影片"
+            fi
+          fi
